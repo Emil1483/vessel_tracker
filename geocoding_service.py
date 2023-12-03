@@ -2,7 +2,6 @@ import googlemaps
 from dotenv import load_dotenv
 
 from os import getenv
-from pprint import pprint
 
 load_dotenv()
 
@@ -27,3 +26,5 @@ def get_port_name(lat: float, lng: float):
 
 if __name__ == "__main__":
     print(get_port_name(59.012605, 10.977027))
+    print(get_port_name(59.214866, 3.397548))
+    print(get_port_name(62.094867, 4.995103))
