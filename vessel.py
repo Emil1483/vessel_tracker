@@ -1,9 +1,11 @@
 from datetime import datetime
 from enum import Enum
 from bson.objectid import ObjectId
-from pydantic import BaseModel, Field, validator, computed_field
+from pydantic import BaseModel, computed_field
+import barentswatch_service as barents
+import dateutil.parser
 
-from helpers import string_to_object_id
+from helpers import distance, string_to_object_id
 from geocoding_service import get_port_name
 
 
@@ -45,19 +47,25 @@ class Vessel(BaseModel):
 
         if was_sailing:
             if self.speed < 0.5:
+                print("arrived port with speed", self.speed)
                 return State.arrived_port
             else:
                 return State.sailing
 
-        if self.speed < 0.5:
-            return State.at_port
-        else:
-            return State.left_port
+        prev_port = self.voyages[-1]
+        distance_to_port = distance(
+            (prev_port.lat, prev_port.lng),
+            (self.lat, self.lng),
+        )
 
-    def updated_voyages(self):
-        now = int(datetime.now().timestamp())
+        if distance_to_port > 0.1 and self.speed > 0.5:
+            print("left port with distance", distance_to_port, "and speed", self.speed)
+            return State.left_port
+        else:
+            return State.at_port
+
+    def updated_voyages(self, dtg: int):
         state = self.get_state()
-        print(f"state: {state}")
 
         if state == State.arrived_port:
             return [
@@ -66,7 +74,7 @@ class Vessel(BaseModel):
                     port=get_port_name(self.lat, self.lng),
                     lat=self.lat,
                     lng=self.lng,
-                    ata=now,
+                    ata=dtg,
                     atd=-1,
                 ),
             ]
@@ -75,7 +83,7 @@ class Vessel(BaseModel):
             return [*self.voyages]
 
         if state == State.left_port:
-            return [*self.voyages[:-1], self.voyages[-1].with_atd(now)]
+            return [*self.voyages[:-1], self.voyages[-1].with_atd(dtg)]
 
         if state == State.sailing:
             return [*self.voyages]

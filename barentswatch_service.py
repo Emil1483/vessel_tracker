@@ -4,7 +4,7 @@ from time import time
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 
-from vessel import Vessel
+import vessel as models
 
 
 access_token_cache = {
@@ -41,6 +41,16 @@ def get_access_token():
     return access_token
 
 
+def vessel_from_ais(mmsi: str, ais: dict):
+    return models.Vessel(
+        mmsi=mmsi,
+        name=ais["name"],
+        lat=ais["latitude"],
+        lng=ais["longitude"],
+        speed=ais["speedOverGround"],
+    )
+
+
 def get_vessel(mmsi: str):
     token = get_access_token()
     response = requests.post(
@@ -56,13 +66,7 @@ def get_vessel(mmsi: str):
 
     ais = response.json()[0]
 
-    return Vessel(
-        mmsi=mmsi,
-        name=ais["name"],
-        lat=ais["latitude"],
-        lng=ais["longitude"],
-        speed=ais["speedOverGround"],
-    )
+    return vessel_from_ais(mmsi, ais)
 
 
 def search_for_vessel(query: str):
@@ -92,7 +96,7 @@ def get_historic_ais(mmsi: int, duration=36):
         },
     )
 
-    return response.json()
+    return response.json()[::-1]
 
 
 def get_historic_positions_from_mmsi(mmsi: int, duration=36, interval=40):
