@@ -34,6 +34,8 @@ class Vessel(BaseModel):
     lng: float
     speed: float
     voyages: list[Voyage] = []
+    notify_on_arrived: bool = False
+    notify_on_left: bool = False
 
     def with_voyages(self, voyages: list[Voyage]):
         return self.model_copy(update={"voyages": voyages})

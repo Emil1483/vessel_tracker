@@ -7,6 +7,7 @@ from pymongo.errors import DuplicateKeyError
 
 from barentswatch_service import get_historic_positions_from_mmsi, get_vessel
 from helpers import string_to_object_id
+from vessel import Vessel
 
 load_dotenv()
 
@@ -66,6 +67,23 @@ def delete_vessel(mmsi):
         return "OK"
     else:
         return "Vessel not found", 404
+
+
+@app.route("/vessels/<mmsi>", methods=["PUT"])
+def put_vessel(mmsi):
+    _id = string_to_object_id(mmsi)
+    result = mongo.db.vessels.find_one({"_id": _id})
+    if not result:
+        return f"vessel with mmsi '{mmsi}' not found", 404
+
+    vessel = Vessel(**result).model_copy(update=request.get_json())
+
+    mongo.db.vessels.update_one(
+        {"_id": _id},
+        {"$set": vessel.dict()},
+    )
+
+    return "OK"
 
 
 @app.route("/lookup_mmsi/<mmsi>")
