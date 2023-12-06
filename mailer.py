@@ -5,6 +5,11 @@ from dataclasses import dataclass
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
 
 @dataclass(frozen=True, order=True)
 class Attachment:
@@ -26,10 +31,10 @@ def send_mail(
 
     EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
     PRIVATE_EMAIL_ADDRESS = os.getenv("PRIVATE_EMAIL_ADDRESS")
-    API_KEY = os.getenv("EMAIL_API_KEY")
+    EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
     to = recipients or PRIVATE_EMAIL_ADDRESS
-    me = f"Emil Djupvik <{EMAIL_ADDRESS}>"
+    me = EMAIL_ADDRESS
 
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
@@ -50,8 +55,8 @@ def send_mail(
         )
 
     try:
-        with smtplib.SMTP_SSL("smtp.sendgrid.net", 465, context=context) as smtp:
-            smtp.login("apikey", API_KEY)
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as smtp:
+            smtp.login(me, EMAIL_PASSWORD)
 
             smtp.sendmail(me, to, msg.as_string())
             print(f"Sent mail with subject {subject} to {to}")
@@ -60,3 +65,7 @@ def send_mail(
             print(f"Could not send mail: {e}")
         else:
             raise e
+
+
+if __name__ == "__main__":
+    send_mail("Test Subject", "Test Content")
