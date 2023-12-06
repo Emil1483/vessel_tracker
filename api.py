@@ -69,8 +69,8 @@ def delete_vessel(mmsi):
         return "Vessel not found", 404
 
 
-@app.route("/vessels/<mmsi>", methods=["PUT"])
-def put_vessel(mmsi):
+@app.route("/vessels/<mmsi>", methods=["PATCH"])
+def update_vessel(mmsi):
     _id = string_to_object_id(mmsi)
     result = mongo.db.vessels.find_one({"_id": _id})
     if not result:
