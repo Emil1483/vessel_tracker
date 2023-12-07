@@ -21,8 +21,12 @@ mongo = PyMongo(app)
 def create_vessel():
     data = request.get_json()
     mmsi = data.get("mmsi")
+    comment = data.get("comment", None)
 
     vessel = get_vessel(mmsi)
+
+    if comment:
+        vessel = vessel.model_copy(update={"comment": comment})
 
     try:
         mongo.db.vessels.insert_one(vessel.dict())

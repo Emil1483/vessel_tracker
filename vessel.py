@@ -1,9 +1,6 @@
-from datetime import datetime
 from enum import Enum
 from bson.objectid import ObjectId
 from pydantic import BaseModel, computed_field
-import barentswatch_service as barents
-import dateutil.parser
 
 from helpers import distance, string_to_object_id
 from geocoding_service import get_port_name
@@ -36,6 +33,7 @@ class Vessel(BaseModel):
     voyages: list[Voyage] = []
     notify_on_arrived: bool = False
     notify_on_left: bool = False
+    comment: str = ""
 
     def with_voyages(self, voyages: list[Voyage]):
         return self.model_copy(update={"voyages": voyages})
