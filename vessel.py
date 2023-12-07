@@ -40,6 +40,15 @@ class Vessel(BaseModel):
     def with_voyages(self, voyages: list[Voyage]):
         return self.model_copy(update={"voyages": voyages})
 
+    def with_ais(self, ais: dict):
+        return self.model_copy(
+            update={
+                "lat": ais["latitude"],
+                "lng": ais["longitude"],
+                "speed": ais["speedOverGround"],
+            }
+        )
+
     def get_state(self):
         was_sailing = False
         if not self.voyages:

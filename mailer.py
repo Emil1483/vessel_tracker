@@ -40,7 +40,6 @@ def send_mail(
     msg["Subject"] = subject
     msg["From"] = me
     msg["To"] = to
-    msg["X-Priority"] = "1"
 
     msg.attach(MIMEText(content, content_type))
 

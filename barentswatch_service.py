@@ -3,8 +3,10 @@ import os
 from time import time
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from geocoding_service import get_country
 
 import vessel as models
+from helpers import distance
 
 
 access_token_cache = {
@@ -104,5 +106,32 @@ def get_historic_positions_from_mmsi(mmsi: int, duration=36, interval=40):
         yield ais["latitude"], ais["longitude"]
 
 
+def get_historic_ports(mmsi: int, duration=8766):
+    stopped = False
+    stopped_pos = (0, 0)
+    results = []
+    for ais in get_historic_ais(mmsi, duration=duration):
+        pos = ais["latitude"], ais["longitude"]
+        speed = ais["speedOverGround"]
+
+        if stopped:
+            dist = distance((pos), stopped_pos)
+            if dist > 5:
+                stopped = False
+                country = get_country(*pos)
+                results.append(country)
+                print("LEFT PORT", pos)
+        else:
+            if speed < 0.5:
+                stopped = True
+                stopped_pos = pos
+                print("ARRIVED PORT", pos)
+
+    if not results:
+        print("Available ais data:", get_historic_ais(mmsi))
+
+    return results
+
+
 if __name__ == "__main__":
-    print(*get_historic_positions_from_mmsi(219025221))
+    print(get_historic_ports(636018343))
