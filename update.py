@@ -38,13 +38,16 @@ if __name__ == "__main__":
             ata = vessel.voyages[-1].ata
             ata_datetime = datetime.utcfromtimestamp(ata)
             ata_string = ata_datetime.strftime("%d %H%MZ %b %Y").upper()
+            vessel_string = vessel.name
+            if vessel.comment:
+                vessel_string += f" ({vessel.comment})"
 
             send_mail(
                 f"{vessel.name} - {vessel.mmsi}",
                 read_html("arrival.html")
                 .replace("{ATA}", ata_string)
                 .replace("{PORT}", port_name)
-                .replace("{VESSEL}", vessel.name),
+                .replace("{VESSEL}", vessel_string),
                 content_type="html",
             )
 
@@ -57,12 +60,16 @@ if __name__ == "__main__":
             ata = vessel.voyages[-1].ata
             atd_datetime = datetime.utcfromtimestamp(ata)
             atd_string = atd_datetime.strftime("%d %H%MZ %b %Y").upper()
+            vessel_string = vessel.name
+            if vessel.comment:
+                vessel_string += f" ({vessel.comment})"
+
             send_mail(
                 f"{vessel.name} - {vessel.mmsi}",
                 read_html("departure.html")
                 .replace("{ATD}", atd_string)
                 .replace("{PORT}", port_name)
-                .replace("{VESSEL}", vessel.name),
+                .replace("{VESSEL}", vessel_string),
                 content_type="html",
             )
 
